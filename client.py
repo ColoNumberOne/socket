@@ -15,37 +15,47 @@ import socket
 SERVER_ADDRESS = '127.0.0.1'
 SERVER_PORT = 22224
 
-sock_service = socket.socket()
+def invia_comandi(sock_service):
+    while True:
+        try:
+            dati = input("Inserisci i dati da inviare (0 per terminare la connessione): ")
+        except EOFError:
+            print("\nOkay. Exit")
+            break
+        if not dati:
+            print("Non puoi inviare una stringa vuota!")
+            continue
+        if dati == '0':
+            print("Chiudo la connessione con il server!")
+            break
+        
+        dati = dati.encode()
+        sock_service.send(dati)
+        print("ti ho inviato ", dati)
+        dati = sock_service.recv(2048)
 
-sock_service.connect((SERVER_ADDRESS, SERVER_PORT))
+        if not dati:
 
-print("Connesso a " + str((SERVER_ADDRESS, SERVER_PORT)))
-while True:
-    try:
-        dati = input("Inserisci i dati da inviare (0 per terminare la connessione): ")
-    except EOFError:
-        print("\nOkay. Exit")
-        break
-    if not dati:
-        print("Non puoi inviare una stringa vuota!")
-        continue
-    if dati == '0':
-        print("Chiudo la connessione con il server!")
-        break
+            print("Server non risponde. Exit")
+            break
+        
+        
+        dati = dati.decode()
+
+        print("Ricevuto dal server:")
+        print(dati + '\n')
+
+    sock_service.close()
     
-    dati = dati.encode()
 
-    sock_service.send(dati)
-    print("ti ho inviato ", dati)
-    dati = sock_service.recv(2048)
+def connessione_server(address, port):
+    sock_service = socket.socket()
 
-    if not dati:
-        print("Server non risponde. Exit")
-        break
+    sock_service.connect((address, port))
+
+    print("Connesso a " + str((address, port)))
+    invia_comandi(sock_service)
     
-    dati = dati.decode()
 
-    print("Ricevuto dal server:")
-    print(dati + '\n')
-
-sock_service.close()
+if __name__=='__main__':
+    connessione_server(SERVER_ADDRESS,SERVER_PORT)          
