@@ -1,11 +1,33 @@
+#!/usr/bin/env python3
 import socket
 
-HOST = '127.0.0.1'  
-PORT = 65432        
+SERVER_ADDRESS = '127.0.0.1'  # The server's hostname or IP address
+SERVER_PORT = 22224        # The port used by the server
+sock_service = socket.socket()
+sock_service.connect((SERVER_ADDRESS, SERVER_PORT))
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect((HOST, PORT))
-    s.sendall(b'Hello, world')
-    data = s.recv(1024)
+print ("Client connesso a" + str((SERVER_ADDRESS, SERVER_PORT)))
 
-print('Received', data.decode())
+protocollo = ["SYN", "SYN ACK", "ACK with DATA", "ACK for Data"]
+step = 0
+dati = str(step)
+while True:
+    try:
+     dati = input("Inserisci i dati da inviare (0 per terminare la connessione): ") #richiesta di un input 
+    except EOFError:
+        print("\nOkay. Exit")
+        break
+    if not dati:
+        print("Non puoi inviare una stringa vuota!") #controllo
+        continue
+    if dati == '0':
+        print("Chiudo la connessione con il server!") #chiusura del server
+        break
+    
+    dati = dati.encode()
+
+    sock_service.send(dati)
+
+    dati = sock_service.recv(2048)
+
+sock_service.close()
